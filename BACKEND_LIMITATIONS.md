@@ -1,25 +1,15 @@
-# Estado de integración con el backend
+# Limitaciones conocidas de integración con el backend
 
-## 22 de septiembre de 2026
+## 23 de septiembre de 2026
 
-La implementación del frontend debe basarse estrictamente en el repositorio
-`MoiDiazD/pc-store`. Antes de crear endpoints o modelos de dominio se intentó
-clonar dicho repositorio con:
+El frontend se implementa con el contrato real de [`BACKEND_API.md`](./BACKEND_API.md), sin clonar ni modificar el repositorio backend. Los servicios tipados consumen autenticación, catálogo, categorías, marcas, carrito, pedidos y cuenta mediante cookies de sesión (`credentials: 'include'`). En desarrollo, Vite reenvía `/api` a `http://localhost:3000` para evitar el problema de CORS documentado por el backend.
 
-```sh
-git clone --depth 1 https://github.com/MoiDiazD/pc-store.git /tmp/pc-store-backend
-```
+## Pago Stripe pendiente de integración del navegador
 
-La red del entorno devolvió `CONNECT tunnel failed, response 403`. Un intento
-adicional de abrir el repositorio con el navegador disponible devolvió `401
-Unauthorized`.
+`POST /orders/checkout` está disponible en el servicio tipado: bloquea el carrito y devuelve un `clientSecret` de Stripe. Sin embargo, el contrato no proporciona una clave publicable de Stripe, ni describe el SDK o el flujo de confirmación que debe ejecutar el navegador. Por tanto, el frontend **no puede confirmar correctamente el pago** ni mostrar un pedido como exitoso sin inventar una integración. La pantalla de checkout comunica esta limitación y no inicia un pedido pendiente que no puede cobrar ni confirmar; tampoco simula pagos exitosos.
 
-Por ello no fue posible verificar controllers, DTOs, rutas, respuestas,
-autenticación por sesión, roles, carrito, pedidos ni Stripe. Para no incumplir
-el contrato indicado, esta primera fase solo incorpora la base del frontend y
-un transporte HTTP centralizado que envía cookies con `credentials: 'include'`.
-No se han creado servicios de producto, autenticación, carrito, checkout ni
-pedidos, ya que sus rutas y cuerpos no se pueden inferir sin inventar API.
+## Capacidades no expuestas por la API
 
-Cuando el backend sea accesible, el siguiente paso es inspeccionarlo y añadir
-los servicios tipados por funcionalidad a partir de sus contratos reales.
+No se implementan controles que aparenten llamadas al servidor para búsqueda, paginación, filtros u ordenación de productos, imágenes, reseñas, favoritos, cupones, direcciones/envíos, cancelación/reintento de pedidos ni webhook de Stripe, porque el contrato no ofrece dichos endpoints. El catálogo permite navegación por categorías mediante `GET /categories/:id/products`, que sí está documentado.
+
+Para despliegues con frontend y backend en orígenes distintos, el backend necesitará configurar CORS o compartir origen; el proxy de Vite solo resuelve el desarrollo local.
