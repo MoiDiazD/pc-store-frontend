@@ -21,7 +21,9 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
     } catch { /* A response body is not required for errors. */ }
     throw new ApiError(response.status, message || 'No se pudo completar la solicitud.')
   }
-  return response.status === 204 ? undefined as T : response.json() as Promise<T>
+  if (response.status === 204) return undefined as T
+  const contentType = response.headers.get('content-type') ?? ''
+  return (contentType.includes('application/json') ? response.json() : undefined) as Promise<T>
 }
 
 export function userMessage(error: unknown): string {
