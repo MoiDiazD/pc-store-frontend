@@ -4,7 +4,7 @@
 
 El frontend se implementa con el contrato real de [`BACKEND_API.md`](./BACKEND_API.md), sin clonar ni modificar el repositorio backend. Los servicios tipados consumen autenticación, catálogo, categorías, marcas, carrito, pedidos y cuenta mediante cookies de sesión (`credentials: 'include'`). En desarrollo, Vite reenvía `/api` a `http://localhost:3000` para evitar el problema de CORS documentado por el backend.
 
-## Pago Stripe pendiente de integración del navegador
+## Integración Stripe del navegador
 
 `POST /orders/checkout` está disponible en el servicio tipado: bloquea el carrito y devuelve un `clientSecret` de Stripe. La investigación del contrato confirma que el siguiente paso debe ser una confirmación del `PaymentIntent` en el navegador mediante el SDK oficial de Stripe y su Payment Element; el webhook del backend es el único mecanismo que confirma o cancela finalmente el pedido. El frontend nunca debe invocar `POST /payments/webhook`.
 
