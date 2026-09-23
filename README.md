@@ -64,8 +64,8 @@ Las rutas de administración permiten restaurar por ID conocido. Esto es deliber
 
 El backend puede crear el PaymentIntent con `POST /orders/checkout` y devuelve un `clientSecret`. El navegador debe después usar el Payment Element de Stripe para confirmar el pago; el webhook del backend cambia el pedido a `confirmed` o `cancelled`.
 
-Cuando `VITE_STRIPE_PUBLISHABLE_KEY` está configurada, la pantalla inicia el checkout, monta el Payment Element con el `clientSecret` devuelto y confirma el pago en el navegador. Después dirige al detalle del pedido, que consulta `GET /orders/:id` hasta que el webhook del backend confirma o cancela su estado. Si falta la clave de entorno, se muestra un error de configuración y no se bloquea el carrito iniciando un checkout incompleto. Consulta [`BACKEND_LIMITATIONS.md`](./BACKEND_LIMITATIONS.md) para la limitación de CORS en producción.
+La integración de navegador queda bloqueada de forma segura mientras falten la clave publicable de Stripe del entorno y los paquetes oficiales del SDK de Stripe. La pantalla no inicia un checkout incompleto ni muestra un pago ficticio. Consulta [`BACKEND_LIMITATIONS.md`](./BACKEND_LIMITATIONS.md) para los requisitos concretos y la limitación de CORS en producción.
 
 ## Tests
 
-La batería Vitest cubre el cliente API centralizado, login/logout, el refresco de sesión de `AuthContext` y la confirmación del Payment Element. Se priorizan contratos y flujos que no requieren un backend real. Para ejecutar los tests hace falta haber instalado las dependencias del proyecto.
+La batería Vitest cubre el cliente API centralizado: serialización JSON, cookies de sesión, errores HTTP y mensajes seguros. Se priorizan contratos y flujos que no requieren un backend real. Para ejecutar los tests hace falta haber instalado las dependencias del proyecto.
