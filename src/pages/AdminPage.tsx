@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
-import { canManageProducts, canManageStore } from '../features/auth/roles'
 import { userMessage } from '../services/api-client'
 import { catalogApi, type ProductInput } from '../services/catalog-api'
 import type { Brand, Category, Product, Role, User } from '../services/types'
@@ -17,8 +16,8 @@ export function AdminPage() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
-  const canManage = canManageStore(user?.role)
-  const canWork = canManageProducts(user?.role)
+  const canManage = user?.role === 'manager'
+  const canWork = canManage || user?.role === 'worker'
   const reload = useCallback(async () => {
     setError('')
     try { const [p, b, c] = await Promise.all([catalogApi.products(), catalogApi.brands(), catalogApi.categories()]); setProducts(p); setBrands(b); setCategories(c) }

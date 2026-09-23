@@ -828,11 +828,34 @@ View order
    ↓
 Manage account
 ```
+# 29. Implementation Must Continue When Verification Is Blocked
+
+A development environment may prevent dependency installation, application
+execution, browser testing or external-service verification.
+
+These are verification limitations, not necessarily implementation
+limitations.
+
+If implementation is possible without runtime verification:
+
+1. Continue implementing the feature.
+2. Add required dependencies to package.json.
+3. Add required environment variables to .env.example.
+4. Add appropriate tests.
+5. Update documentation.
+6. Do not replace real functionality with fake behavior.
+7. Clearly document what could not be executed.
+
+Never leave an implementable feature unfinished solely because the current
+environment cannot execute or verify it.
+
+A feature is not "blocked" merely because npm, Vite, Stripe, the browser,
+or another external service cannot currently be executed.
 
 The application should feel like a coherent product rather than a collection of disconnected frontend exercises.
 
 After the frontend is complete, the project will undergo a separate security/pentesting phase.
-
+---
 **Do not intentionally introduce vulnerabilities for that phase.**
 
 The security testing should evaluate what vulnerabilities naturally remain after normal development and good engineering practices.
