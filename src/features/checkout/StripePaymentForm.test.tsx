@@ -16,7 +16,7 @@ describe('StripePaymentForm', () => {
     render(<MemoryRouter><StripePaymentForm orderId={88} /></MemoryRouter>)
     expect(screen.getByTestId('payment-element')).toBeTruthy()
     fireEvent.submit(screen.getByRole('button', { name: 'Confirmar y pagar' }).closest('form')!)
-    await waitFor(() => expect(confirmPayment).toHaveBeenCalledWith(expect.objectContaining({ confirmParams: { return_url: `${window.location.origin}/pedidos/88` } })))
+    await waitFor(() => expect(confirmPayment).toHaveBeenCalledWith(expect.objectContaining({ confirmParams: { return_url: `${window.location.origin}/pedidos/88?pago=en-proceso` } })))
   })
 
   it('does not claim success when Stripe returns a confirmation error', async () => {
