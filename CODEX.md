@@ -859,3 +859,49 @@ After the frontend is complete, the project will undergo a separate security/pen
 **Do not intentionally introduce vulnerabilities for that phase.**
 
 The security testing should evaluate what vulnerabilities naturally remain after normal development and good engineering practices.
+
+
+# 29. Implementation vs Verification
+
+A feature that cannot currently be executed or verified is not necessarily a feature that cannot be implemented.
+
+If npm, the network, Vite, a browser or an external service prevents verification:
+
+1. Continue implementing all source code that can be implemented.
+2. Add required dependencies to package.json.
+3. Add environment variables to .env.example.
+4. Add meaningful tests.
+5. Update documentation.
+6. Do not replace real functionality with fake behavior.
+7. Report execution limitations separately from implementation status.
+
+A 403 from npm is a verification/environment limitation, not a reason to leave implementable application code unfinished.
+
+# 30. Production Code Must Match Tests
+
+Tests do not prove that a feature is implemented. Before considering a feature complete, inspect the production implementation and confirm that it actually provides the behavior covered by its tests.
+
+The following must remain consistent:
+
+production code -> real API contract -> real UI -> tests
+
+Do not create tests for functionality that is absent from production code merely to make coverage look complete. Do not mark a feature complete only because its test file exists.
+
+# 31. Autonomous Completion
+
+When a task asks for the frontend to be completed, continue through all implementable features and the final consistency audit without stopping after one sub-feature.
+
+Known backend limitations such as missing PaymentIntent query/retry endpoints, missing soft-deleted listings, or production CORS configuration must be documented but must not block unrelated frontend implementation.
+
+Before finishing, inspect the repository for:
+
+- unfinished production features
+- placeholder pages
+- tests that describe behavior missing from production code
+- stale documentation
+- dead code and unused dependencies
+- loading/error/empty states
+- role-based behavior
+- responsive behavior
+
+Only stop implementation when all implementable work is complete or a genuine backend contract limitation prevents it.
