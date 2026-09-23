@@ -10,12 +10,17 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "latest",
+    "@stripe/stripe-js": "latest",
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "latest"
   },
   "devDependencies": {
     "@eslint/js": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
