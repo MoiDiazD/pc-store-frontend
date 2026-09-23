@@ -19,7 +19,7 @@ export function StripePaymentForm({ orderId }: StripePaymentFormProps) {
     try {
       const result = await stripe.confirmPayment({
         elements,
-        confirmParams: { return_url: `${window.location.origin}/pedidos/${orderId}` },
+        confirmParams: { return_url: `${window.location.origin}/pedidos/${orderId}?pago=en-proceso` },
       })
       if (result.error) {
         setError('No se pudo confirmar el pago. Revisa los datos de pago e inténtalo de nuevo.')
