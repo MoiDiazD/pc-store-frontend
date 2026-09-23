@@ -50,7 +50,7 @@ export function OrdersPage() {
       ) : error ? (
         <div className="empty">
           <p className="form-error" role="alert">{error}</p>
-          <button onClick={() => void loadOrders}>Reintentar</button>
+          <button onClick={() => void loadOrders()}>Reintentar</button>
         </div>
       ) : orders.length === 0 ? (
         <div className="empty">
