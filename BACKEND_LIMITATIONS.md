@@ -2,18 +2,35 @@
 
 ## 23 de septiembre de 2026
 
-El frontend se implementa con el contrato real de [`BACKEND_API.md`](./BACKEND_API.md), sin clonar ni modificar el repositorio backend. Los servicios tipados consumen autenticación, catálogo, categorías, marcas, carrito, pedidos y cuenta mediante cookies de sesión (`credentials: 'include'`). En desarrollo, Vite reenvía `/api` a `http://localhost:3000` para evitar el problema de CORS documentado por el backend.
+El frontend usa el contrato real de BACKEND_API.md, sin modificar el backend. En desarrollo, Vite reenvía /api a http://localhost:3000.
 
-## Integración Stripe del navegador
+## Pago Stripe
 
-`POST /orders/checkout` está disponible en el servicio tipado: bloquea el carrito y devuelve un `clientSecret` de Stripe. La investigación del contrato confirma que el siguiente paso debe ser una confirmación del `PaymentIntent` en el navegador mediante el SDK oficial de Stripe y su Payment Element; el webhook del backend es el único mecanismo que confirma o cancela finalmente el pedido. El frontend nunca debe invocar `POST /payments/webhook`.
+El checkout de navegador está implementado con el SDK oficial:
 
-Actualmente faltan dos requisitos verificables para habilitar ese paso sin inventar una integración: una clave **publicable** de Stripe para el entorno (`VITE_STRIPE_PUBLISHABLE_KEY`, de tipo `pk_...`) y las dependencias oficiales del SDK de navegador (`@stripe/stripe-js` y `@stripe/react-stripe-js`) en el proyecto. No se ha incluido ni se solicita `STRIPE_SECRET_KEY`: esa clave sólo corresponde al backend. Hasta que estén disponibles esos requisitos, la pantalla no llama a `/orders/checkout`, porque hacerlo bloquearía el carrito y crearía un pedido pendiente que no puede confirmarse desde esta aplicación. No se simula un pago exitoso.
+- POST /orders/checkout crea el checkout y devuelve clientSecret.
+- @stripe/stripe-js inicializa Stripe con VITE_STRIPE_PUBLISHABLE_KEY.
+- @stripe/react-stripe-js renderiza el Payment Element.
+- stripe.confirmPayment() confirma el pago desde el navegador.
+- El frontend nunca invoca POST /payments/webhook.
+- El detalle consulta GET /orders/:id para observar el estado establecido por el webhook.
 
-El contrato tampoco ofrece un endpoint para consultar el estado de un `PaymentIntent` ni un endpoint de reintento. Tras incorporar el Payment Element, la UI debe dirigir al detalle del pedido y reflejar el estado que devuelva `GET /orders/:id`; el webhook seguirá siendo quien cambie el estado definitivo.
+La clave publicable es configuración de runtime. Si falta, el frontend no inicia POST /orders/checkout y muestra un mensaje claro. Nunca se usa STRIPE_SECRET_KEY en el frontend.
+
+El contrato no ofrece consulta directa del PaymentIntent ni endpoint de reintento. El flujo implementado no inventa ninguno: usa el estado del pedido.
 
 ## Capacidades no expuestas por la API
 
-No se implementan controles que aparenten llamadas al servidor para búsqueda, paginación, filtros u ordenación de productos, imágenes, reseñas, favoritos, cupones, direcciones/envíos, cancelación/reintento de pedidos ni webhook de Stripe, porque el contrato no ofrece dichos endpoints. El catálogo permite navegación por categorías mediante `GET /categories/:id/products`, que sí está documentado.
+No se implementan búsqueda, paginación, filtros, imágenes, reseñas, favoritos, cupones, direcciones/envíos, cancelación/reintento de pedidos ni consulta directa de PaymentIntent porque el backend no ofrece esos endpoints.
 
-Para despliegues con frontend y backend en orígenes distintos, el backend necesitará configurar CORS o compartir origen; el proxy de Vite solo resuelve el desarrollo local.
+El catálogo sí permite navegación por categorías mediante GET /categories/:id/products.
+
+La administración puede restaurar recursos por ID conocido, pero el backend no publica un listado de recursos soft-deleted.
+
+## CORS
+
+Para despliegues con frontend y backend en orígenes distintos, el backend necesitará configurar CORS o compartir origen. El proxy de Vite sólo resuelve el desarrollo local.
+
+## Verificación del entorno
+
+Si npm devuelve 403 Forbidden, eso impide instalar o ejecutar checks en ese entorno, pero no impide implementar código estáticamente. npm test, npm run lint y npm run build sólo deben considerarse verificados cuando se hayan ejecutado realmente.
