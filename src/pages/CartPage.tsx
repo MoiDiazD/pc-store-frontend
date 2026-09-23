@@ -1,2 +1,154 @@
-import { useCallback, useEffect, useState } from 'react'; import { Link, useNavigate } from 'react-router-dom'; import { cartApi } from '../services/cart-api'; import { useAuth } from '../features/auth/AuthContext'; import { userMessage } from '../services/api-client'; import type { Cart } from '../services/types'; const money=(v:number)=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(v)
-export function CartPage(){const {user,loading}=useAuth();const navigate=useNavigate();const [cart,setCart]=useState<Cart|null>(null);const [error,setError]=useState('');const [busy,setBusy]=useState<number|null>(null);const load=useCallback(async()=>{setError('');try{setCart(await cartApi.get())}catch(e){setError(userMessage(e))}},[]);useEffect(()=>{if(user)void load()},[user,load]);if(!loading&&!user)return <section className="page-state"><h1>Accede para ver tu carrito.</h1><Link className="button button-primary" to="/acceso">Acceder</Link></section>;const items=cart?.items??[];const total=items.reduce((sum,i)=>sum+Number(i.product.price)*i.quantity,0);async function change(id:number,q:number){setBusy(id);setError('');try{q===0?await cartApi.remove(id):await cartApi.update(id,q);await load()}catch(e){setError(userMessage(e))}finally{setBusy(null)}}return <section className="content-page"><p className="eyebrow">Tu selección</p><h1>Carrito</h1>{error&&<div className="empty"><p className="form-error">{error}</p><button onClick={()=>void load()} disabled={busy!==null}>Reintentar</button></div>}{!cart&&!error?<p>Cargando carrito…</p>:cart&&items.length===0?<div className="empty"><p>Tu carrito está vacío.</p><Link className="button button-primary" to="/catalogo">Explorar catálogo</Link></div>:cart&&<><div className="cart-list">{items.map(({product,quantity})=><article className="cart-item" key={product.id}><div><h2>{product.name}</h2><p>{product.model}</p><strong>{money(Number(product.price))}</strong></div><div className="quantity"><button disabled={busy===product.id} onClick={()=>change(product.id,quantity-1)} aria-label="Reducir cantidad">−</button><span>{quantity}</span><button disabled={busy===product.id||quantity>=product.stock} onClick={()=>change(product.id,quantity+1)} aria-label="Aumentar cantidad">+</button></div></article>)}</div><div className="cart-total"><strong>Total: {money(total)}</strong><button className="button button-primary" onClick={()=>navigate('/checkout')}>Continuar al pago</button></div></>}</section>}
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { useAuth } from '../features/auth/AuthContext';
+import { cartApi } from '../services/cart-api';
+import { userMessage } from '../services/api-client';
+import type { Cart } from '../services/types';
+
+const money = (value: number) =>
+  new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(value);
+
+export function CartPage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const [cart, setCart] = useState<Cart | null>(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    setError('');
+
+    try {
+      setCart(await cartApi.get());
+    } catch (error) {
+      setError(userMessage(error));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      void load();
+    }
+  }, [user, load]);
+
+  if (!loading && !user) {
+    return (
+      <section className="page-state">
+        <h1>Accede para ver tu carrito.</h1>
+        <Link className="button button-primary" to="/acceso">
+          Acceder
+        </Link>
+      </section>
+    );
+  }
+
+  const items = cart?.items ?? [];
+
+  const total = items.reduce(
+    (sum, item) => sum + Number(item.product.price) * item.quantity,
+    0,
+  );
+
+  async function change(id: number, quantity: number) {
+    setBusy(id);
+    setError('');
+
+    try {
+      if (quantity === 0) {
+        await cartApi.remove(id);
+      } else {
+        await cartApi.update(id, quantity);
+      }
+
+      await load();
+    } catch (error) {
+      setError(userMessage(error));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <section className="content-page">
+      <p className="eyebrow">Tu selección</p>
+
+      <h1>Carrito</h1>
+
+      {error && (
+        <div className="empty">
+          <p className="form-error">{error}</p>
+
+          <button onClick={() => void load()} disabled={busy !== null}>
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {!cart && !error ? (
+        <p>Cargando carrito…</p>
+      ) : cart && items.length === 0 ? (
+        <div className="empty">
+          <p>Tu carrito está vacío.</p>
+
+          <Link className="button button-primary" to="/catalogo">
+            Explorar catálogo
+          </Link>
+        </div>
+      ) : (
+        cart && (
+          <>
+            <div className="cart-list">
+              {items.map(({ product, quantity }) => (
+                <article className="cart-item" key={product.id}>
+                  <div>
+                    <h2>{product.name}</h2>
+                    <p>{product.model}</p>
+                    <strong>{money(Number(product.price))}</strong>
+                  </div>
+
+                  <div className="quantity">
+                    <button
+                      disabled={busy === product.id}
+                      onClick={() => change(product.id, quantity - 1)}
+                      aria-label="Reducir cantidad"
+                    >
+                      −
+                    </button>
+
+                    <span>{quantity}</span>
+
+                    <button
+                      disabled={
+                        busy === product.id || quantity >= product.stock
+                      }
+                      onClick={() => change(product.id, quantity + 1)}
+                      aria-label="Aumentar cantidad"
+                    >
+                      +
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="cart-total">
+              <strong>Total: {money(total)}</strong>
+
+              <button
+                className="button button-primary"
+                onClick={() => navigate('/checkout')}
+              >
+                Continuar al pago
+              </button>
+            </div>
+          </>
+        )
+      )}
+    </section>
+  );
+}
